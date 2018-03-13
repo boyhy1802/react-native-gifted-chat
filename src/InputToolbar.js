@@ -1,46 +1,49 @@
-/* eslint no-use-before-define: ["error", { "variables": false }] */
-
 import PropTypes from 'prop-types';
 import React from 'react';
-import { StyleSheet, View, Keyboard, ViewPropTypes } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  Keyboard,
+  ViewPropTypes,
+  Dimensions,
+  Image,
+  TouchableOpacity
+} from 'react-native';
 
 import Composer from './Composer';
 import Send from './Send';
 import Actions from './Actions';
-import Color from './Color';
-
+const { width, height } = Dimensions.get('window')
 export default class InputToolbar extends React.Component {
-
   constructor(props) {
     super(props);
 
-    this.keyboardWillShow = this.keyboardWillShow.bind(this);
-    this.keyboardWillHide = this.keyboardWillHide.bind(this);
-
     this.state = {
-      position: 'absolute',
+      position: 'absolute'
     };
   }
 
-  componentWillMount() {
-    this.keyboardWillShowListener = Keyboard.addListener('keyboardWillShow', this.keyboardWillShow);
-    this.keyboardWillHideListener = Keyboard.addListener('keyboardWillHide', this.keyboardWillHide);
+  componentWillMount () {
+    this.keyboardWillShowListener =
+      Keyboard.addListener('keyboardWillShow', this._keyboardWillShow);
+    this.keyboardWillHideListener =
+      Keyboard.addListener('keyboardWillHide', this._keyboardWillHide);
   }
 
-  componentWillUnmount() {
+  componentWillUnmount () {
     this.keyboardWillShowListener.remove();
     this.keyboardWillHideListener.remove();
   }
 
-  keyboardWillShow() {
+  _keyboardWillShow = () => {
     this.setState({
-      position: 'relative',
+      position: 'relative'
     });
   }
 
-  keyboardWillHide() {
+  _keyboardWillHide = () => {
     this.setState({
-      position: 'absolute',
+      position: 'absolute'
     });
   }
 
@@ -57,7 +60,7 @@ export default class InputToolbar extends React.Component {
     if (this.props.renderSend) {
       return this.props.renderSend(this.props);
     }
-    return <Send {...this.props} />;
+    return <Send {...this.props}/>;
   }
 
   renderComposer() {
@@ -65,7 +68,11 @@ export default class InputToolbar extends React.Component {
       return this.props.renderComposer(this.props);
     }
 
-    return <Composer {...this.props} />;
+    return (
+      <Composer
+        {...this.props}
+      />
+    );
   }
 
   renderAccessory() {
@@ -82,32 +89,44 @@ export default class InputToolbar extends React.Component {
   render() {
     return (
       <View
-        style={[styles.container, this.props.containerStyle, { position: this.state.position }]}
-      >
+        style={[styles.container, this.props.containerStyle, { position: this.state.position }]}>
+        <Image
+          style={{width,
+              position: 'absolute'}}
+          source={require('../../../assets/images/bg_tutorial.png')} />
         <View style={[styles.primary, this.props.primaryStyle]}>
+          <Image
+            style={{marginBottom: 8, marginRight: 10}}
+            source={require('../../../assets/images/ic_menu_large.png')} />
           {this.renderActions()}
           {this.renderComposer()}
           {this.renderSend()}
+          <TouchableOpacity
+            onPress={this.props.record}
+          >
+            <Image
+              style={{width: 36, height: 36, marginLeft: 10}}
+              source={require('../../../assets/images/ic_record.png')} />
+          </TouchableOpacity>
         </View>
         {this.renderAccessory()}
       </View>
     );
   }
-
 }
 
 const styles = StyleSheet.create({
   container: {
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: Color.defaultColor,
-    backgroundColor: Color.white,
+    borderTopColor: '#b2b2b2',
+    backgroundColor: '#FFFFFF',
     bottom: 0,
-    left: 0,
-    right: 0,
+    width: Dimensions.get('window').width
   },
   primary: {
     flexDirection: 'row',
     alignItems: 'flex-end',
+    margin:7
   },
   accessory: {
     height: 44,
@@ -119,13 +138,14 @@ InputToolbar.defaultProps = {
   renderActions: null,
   renderSend: null,
   renderComposer: null,
+  record: null,
   containerStyle: {},
   primaryStyle: {},
   accessoryStyle: {},
-  onPressActionButton: () => {},
 };
 
 InputToolbar.propTypes = {
+  record: PropTypes.func,
   renderAccessory: PropTypes.func,
   renderActions: PropTypes.func,
   renderSend: PropTypes.func,
