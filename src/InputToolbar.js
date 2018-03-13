@@ -7,7 +7,8 @@ import {
   ViewPropTypes,
   Dimensions,
   Image,
-  TouchableOpacity
+  TouchableOpacity,
+  Platform
 } from 'react-native';
 
 import Composer from './Composer';
@@ -89,7 +90,8 @@ export default class InputToolbar extends React.Component {
   render() {
     return (
       <View
-        style={[styles.container, this.props.containerStyle, { position: this.state.position }]}>
+        style={[styles.container, this.props.containerStyle, { position: this.state.position },
+          { bottom: Platform.OS === 'ios' ? (this.state.background && this.props.background ? 65 : 10) : 0 }]}>
         <Image
           style={{width,
               position: 'absolute'}}
