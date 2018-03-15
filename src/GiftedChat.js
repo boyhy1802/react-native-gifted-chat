@@ -30,6 +30,7 @@ import MessageContainer from './MessageContainer';
 import Send from './Send';
 import Time from './Time';
 import GiftedAvatar from './GiftedAvatar';
+import Orientation from 'react-native-orientation'
 import GiftedChatInteractionManager from './GiftedChatInteractionManager';
 import { Fonts } from '../../../src/utils/Fonts'
 
@@ -41,7 +42,9 @@ const MIN_COMPOSER_HEIGHT = Platform.select({
   android: 41,
 });
 const MAX_COMPOSER_HEIGHT = 100;
-const { width, height } = Dimensions.get('screen')
+const { height: deviceHeight, width: deviceWidth } = Dimensions.get('window')
+const width = deviceWidth < deviceHeight ? deviceWidth : deviceHeight
+const height = deviceWidth < deviceHeight ? deviceHeight : deviceWidth
 class GiftedChat extends React.Component {
   constructor(props) {
     super(props);
@@ -58,7 +61,8 @@ class GiftedChat extends React.Component {
       isInitialized: false, // initialization will calculate maxHeight before rendering the chat
       composerHeight: MIN_COMPOSER_HEIGHT,
       messagesContainerHeight: null,
-      typingDisabled: false
+      typingDisabled: false,
+      orientation: ''
     };
 
     this.onKeyboardWillShow = this.onKeyboardWillShow.bind(this);
@@ -109,9 +113,17 @@ class GiftedChat extends React.Component {
     this.initLocale();
     this.setMessages(messages || []);
     this.setTextFromProp(text);
+    Orientation.getOrientation((err, orientation) => {
+      this.setState({
+        orientation: orientation
+      })
+    });
   }
-
+  componentDidMount () {
+    Orientation.addOrientationListener(this._updateOrientation)
+  }
   componentWillUnmount() {
+    Orientation.removeOrientationListener(this._updateOrientation)
     this.setIsMounted(false);
   }
 
@@ -475,19 +487,25 @@ class GiftedChat extends React.Component {
     }
     return null;
   }
-
+  _updateOrientation = (orientation) => this.setState({ orientation })
   render() {
+    const { orientation } = this.state
     if (this.state.isInitialized === true) {
       return (
         <ActionSheet ref={component => this._actionSheetRef = component}>
           <View style={styles.container} onLayout={this.onMainViewLayout}>
-            { this.props.background && <Image
+            { this.props.background && ( orientation === 'PORTRAIT' ? <Image
               style={{width,
                 height,
                 top:0,
                 position: 'absolute'}}
-              source={require('../../../assets/images/bg_gift_chat.png')} /> }
-            {this.props.background && <View style={{width, justifyContent: 'center', alignItems: 'center', marginTop: 5, marginBottom: 20}}>
+              source={require('../../../assets/images/bg_gift_chat.png')} /> : <Image
+              style={{width: height,
+                height: width,
+                top:0,
+                position: 'absolute'}}
+              source={require('../../../assets/images/bg_gifted_chat_landspace.png')} />)}
+            {this.props.background && <View style={[{justifyContent: 'center', alignItems: 'center', marginTop: 5, marginBottom: 20},{width: orientation === 'PORTRAIT' ? width : height}]}>
               <Text style={{
                 fontFamily: Fonts.MontSerrat,
                 fontSize: 25,

@@ -10,17 +10,20 @@ import {
   TouchableOpacity,
   Platform
 } from 'react-native';
-
+import Orientation from 'react-native-orientation'
 import Composer from './Composer';
 import Send from './Send';
 import Actions from './Actions';
-const { width, height } = Dimensions.get('window')
+const { height: deviceHeight, width: deviceWidth } = Dimensions.get('window')
+const width = deviceWidth < deviceHeight ? deviceWidth : deviceHeight
+const height = deviceWidth < deviceHeight ? deviceHeight : deviceWidth
 export default class InputToolbar extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      position: 'absolute'
+      position: 'absolute',
+      orientation: ''
     };
   }
 
@@ -29,11 +32,20 @@ export default class InputToolbar extends React.Component {
       Keyboard.addListener('keyboardWillShow', this._keyboardWillShow);
     this.keyboardWillHideListener =
       Keyboard.addListener('keyboardWillHide', this._keyboardWillHide);
+    Orientation.getOrientation((err, orientation) => {
+      this.setState({
+        orientation: orientation
+      })
+    });
+  }
+  componentDidMount () {
+    Orientation.addOrientationListener(this._updateOrientation)
   }
 
   componentWillUnmount () {
     this.keyboardWillShowListener.remove();
     this.keyboardWillHideListener.remove();
+    Orientation.removeOrientationListener(this._updateOrientation)
   }
 
   _keyboardWillShow = () => {
@@ -47,7 +59,7 @@ export default class InputToolbar extends React.Component {
       position: 'absolute'
     });
   }
-
+  _updateOrientation = (orientation) => this.setState({ orientation })
   renderActions() {
     if (this.props.renderActions) {
       return this.props.renderActions(this.props);
@@ -88,14 +100,20 @@ export default class InputToolbar extends React.Component {
   }
 
   render() {
+    const { orientation } = this.state
     return (
       <View
         style={[styles.container, this.props.containerStyle, { position: this.state.position },
+          {width: orientation === 'PORTRAIT' ? width : height},
           { bottom: Platform.OS === 'ios' ? (this.state.background && this.props.background ? 65 : 10) : 0 }]}>
-        <Image
+
+        {orientation === 'PORTRAIT' ? <Image
           style={{width,
               position: 'absolute'}}
-          source={require('../../../assets/images/bg_tutorial.png')} />
+          source={require('../../../assets/images/bg_tutorial.png')} />: <Image
+          style={{width: height,
+            position: 'absolute'}}
+          source={require('../../../assets/images/bg_tutorial.png')} />}
         <View style={[styles.primary, this.props.primaryStyle]}>
           <Image
             style={{marginBottom: 8, marginRight: 10}}
@@ -122,8 +140,7 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: '#b2b2b2',
     backgroundColor: '#FFFFFF',
-    bottom: 0,
-    width: Dimensions.get('window').width
+    bottom: 0
   },
   primary: {
     flexDirection: 'row',
