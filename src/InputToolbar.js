@@ -24,7 +24,7 @@ export default class InputToolbar extends React.Component {
     this.state = {
       position: 'absolute',
       orientation: '',
-        background: false
+      background: false
     };
   }
 
@@ -52,14 +52,14 @@ export default class InputToolbar extends React.Component {
   _keyboardWillShow = () => {
     this.setState({
       position: 'relative',
-        background: true
+      background: true
     });
   }
 
   _keyboardWillHide = () => {
     this.setState({
       position: 'absolute',
-        background: false
+      background: false
     });
   }
   _updateOrientation = (orientation) => this.setState({ orientation })
@@ -142,7 +142,8 @@ const styles = StyleSheet.create({
   container: {
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: '#b2b2b2',
-    backgroundColor: '#FFFFFF'
+    backgroundColor: '#FFFFFF',
+    bottom: 0
   },
   primary: {
     flexDirection: 'row',
